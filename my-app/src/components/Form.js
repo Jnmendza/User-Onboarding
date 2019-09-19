@@ -1,9 +1,16 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { withFormik, Form, Field } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 
-const onBoardForm = ({ values, errors, touched }) => {
+const onBoardForm = ({ values, errors, touched, status }) => {
+    const [users, setUsers] = useState([]);
+    useEffect(() => {
+        if (status) {
+            setUsers([...users, status]);
+        }
+    }, [status]);
+
     return (
         <div className="on-board-form">
             <Form>
@@ -18,7 +25,7 @@ const onBoardForm = ({ values, errors, touched }) => {
                     Terms of Service
                     <Field type='checkbox' name='terms' checked={values.terms} />
                 </label>
-                <button>Submit!</button>
+                <button type="submit">Submit!</button>
             </Form>
         </div>
     );
@@ -37,7 +44,14 @@ const FormikOnBoardForm = withFormik({
         name: Yup.string().required('You must add your name'),
         email: Yup.string().required('You must add your email'),
         password: Yup.string().required('Please add the password you cant remember'),
-    })
+    }),
+    handleSubmit(values, { setStatus }) {
+        axios
+            .post('https://reqres.in/api/users_', values)
+            .then(response => {setStatus(response.data); })
+            .catch(error => console.log(error.response));
+    }
 })(onBoardForm);
 
+console.log('THIS IS THE HOC', FormikOnBoardForm)
 export default FormikOnBoardForm;
